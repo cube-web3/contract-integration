@@ -24,13 +24,13 @@ The following section describe the steps for creating an integration:
 ### Hardhat  (NPM or Yarn)
   
   ```bash
-npm install --save-dev @cube-web3/contract-integration @openzeppelin/contracts @openzeppelin/openzeppelin-contracts-upgradeable
+npm install --save-dev @cube-web3/cube3-integration @openzeppelin/contracts @openzeppelin/openzeppelin-contracts-upgradeable
 ```
 
 ### Foundry (Forge)
 
 ```bash
-forge install cube-web3/contract-integration @openzeppelin/openzeppelin-contracts @openzeppelin/openzeppelin-contracts-upgradeable 
+forge install cube-web3/cube3-integration @openzeppelin/openzeppelin-contracts @openzeppelin/openzeppelin-contracts-upgradeable 
 ```
 
 Next, you'll need to update your `foundry.toml` and `remappings.txt` files.
@@ -43,7 +43,7 @@ remappings = [
     "ds-test/=lib/forge-std/lib/ds-test/src/",
     "@openzeppelin/contracts=lib/openzeppelin-contracts/contracts/",
     "@openzeppelin/contracts-upgradeable=lib/openzeppelin-contracts/contracts/",
-    "cube3/=lib/contract/contracts/"
+    "cube3/=lib/cube3-integration/contracts/"
 ]
 ```
 
