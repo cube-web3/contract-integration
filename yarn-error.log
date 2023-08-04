@@ -1,0 +1,91 @@
+Arguments: 
+  /Users/craigson/.nvm/versions/node/v16.14.0/bin/node /Users/craigson/.nvm/versions/node/v16.14.0/bin/yarn global bin
+
+PATH: 
+  /Users/craigson/.nvm/versions/node/v16.14.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/Apple/usr/bin
+
+Yarn version: 
+  1.22.19
+
+Node version: 
+  16.14.0
+
+Platform: 
+  darwin arm64
+
+Trace: 
+  Error: Failed to replace env in config: ${NPM_TOKEN}
+      at /Users/craigson/.nvm/versions/node/v16.14.0/lib/node_modules/yarn/lib/cli.js:94933:13
+      at String.replace (<anonymous>)
+      at envReplace (/Users/craigson/.nvm/versions/node/v16.14.0/lib/node_modules/yarn/lib/cli.js:94928:16)
+      at Function.normalizeConfig (/Users/craigson/.nvm/versions/node/v16.14.0/lib/node_modules/yarn/lib/cli.js:31938:69)
+      at NpmRegistry.<anonymous> (/Users/craigson/.nvm/versions/node/v16.14.0/lib/node_modules/yarn/lib/cli.js:31968:34)
+      at Generator.next (<anonymous>)
+      at step (/Users/craigson/.nvm/versions/node/v16.14.0/lib/node_modules/yarn/lib/cli.js:310:30)
+      at /Users/craigson/.nvm/versions/node/v16.14.0/lib/node_modules/yarn/lib/cli.js:321:13
+
+npm manifest: 
+  {
+    "name": "hardhat-template",
+    "version": "1.0.0",
+    "description": "this is a hardhat template",
+    "main": "hardhat.config.ts",
+    "scripts": {
+      "compile": "hardhat compile && hardhat typechain",
+      "test": "hardhat test",
+      "coverage: hardhat": "hardhat coverage",
+      "prettier": "npx prettier -w .",
+      "prepare": "husky install",
+      "husky:pre-commit": "npm run prettier && git add .",
+      "slither": "slither . --filter-paths \"lib|test|node_modules\"",
+      "docs:host": "forge doc --serve --port 4000",
+      "coverage:foundry": "forge coverage --report lcov && genhtml lcov.info --branch-coverage --output-dir coverage",
+      "predeploy": "source .env",
+      "deploy:local:cube3": "forge script scripts/foundry/AnvilDeploy.s.sol -vvvvv --rpc-url http://127.0.0.1:8545 --broadcast",
+      "deploy:local:mock": "forge script scripts/foundry/DeployMockProtocol.s.sol -vvvvv --rpc-url http://127.0.0.1:8545 --broadcast"
+    },
+    "keywords": [
+      "hardhat",
+      "solidity",
+      "web3"
+    ],
+    "author": "Cube3.ai",
+    "license": "MIT",
+    "installConfig": {
+      "hoistingLimits": "dependencies"
+    },
+    "devDependencies": {
+      "@nomicfoundation/hardhat-toolbox": "^2.0.0",
+      "@openzeppelin/hardhat-upgrades": "^1.22.1",
+      "@primitivefi/hardhat-marmite": "0.0.4",
+      "@types/chai": "^4.3.4",
+      "@types/node": "^18.14.2",
+      "@typescript-eslint/eslint-plugin": "^4.33.0",
+      "@typescript-eslint/parser": "^4.33.0",
+      "dotenv": "^16.0.3",
+      "eslint": "^7.32.0",
+      "eslint-config-prettier": "^8.5.0",
+      "eslint-config-standard": "^16.0.3",
+      "eslint-plugin-import": "^2.26.0",
+      "eslint-plugin-node": "^11.1.0",
+      "eslint-plugin-prettier": "^4.2.1",
+      "eslint-plugin-promise": "^5.2.0",
+      "hardhat": "^2.12.4",
+      "husky": "^8.0.2",
+      "prettier": "^2.8.1",
+      "prettier-plugin-solidity": "^1.0.0",
+      "solhint": "^3.4.0",
+      "ts-node": "^10.9.1",
+      "typescript": "^4.9.5"
+    },
+    "dependencies": {
+      "@openzeppelin/contracts": "^4.8.2",
+      "@openzeppelin/contracts-upgradeable": "^4.8.2"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
