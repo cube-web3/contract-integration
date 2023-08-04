@@ -58,6 +58,57 @@ Then update your `remappings.txt `file.
 forge remappings > remappings.txt
 ```
 
+## Step 2: Import and inherit a CUBE3 base contract
+
+Follow section 2.1 if your integration is a standalone contract, or 2.2 if you're using a proxy pattern.
+
+### Step 2.1: Standalone integration
+
+Below is an example of inheriting the Cube3Integration.sol contract into a standalone contract. Cube3Integration.sol inherits from SecurityAdmin2Step.sol, which sets the default Security Admin as the deployer.
+
+```solidity
+import {Cube3Integration} from "cube3/Cube3Integration.sol";
+
+contract MyIntegration is Cube3Integration {
+    ...
+    constructor(...args) Cube3Integration() {
+        ...
+    }
+}
+```
+
+### Step 2.2: Upgradeable/proxy integration
+
+Below is an example of inheriting the `Cube3IntegrationUpgradeable.sol` contract into an upgradeable contract. Because initializers are not linearized by the compiler like constructors, we want to avoid initializing the same contract twice. As such, we follow OpenZeppelin's standards for Multiple Inheritance utilizing the `_init` and `_init_unchained` pattern. Upgradeable integrations will call `__Cube3IntegrationUpgradeable_init(...args) `inside their own initialize functions.
+Unlike the standalone implementation of `Cube3Integration.sol` that inherits `SecurityAdmin2Step.sol`, which sets the default Security Admin as the deployer, the upgradeable version requires the Security Admin to be set explicitly. This provides flexibility for proxy patterns, such as the minimal forwarder proxy, that utilize a factory contract, whereby the deployer would be the factory contract if it was set implicitly. The integration **MUST** initialize Cube3IntegrationUpgradeable in its initialize function to set the protocol contract addresses and the security admin. 
+Eg:
+
+```solidity
+import {Cube3IntegrationUpgradeable} from "cube3/upgradeable/Cube3IntegrationUpgradeable.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+
+contract MyIntegrationUpgradeable is UUPSUpgradeable, Cube3IntegrationUpgradeable {
+
+   function initialize(
+      ...args,
+      address securityAdmin,
+   ) external initializer {
+
+      // Do something with the ...args
+      
+       __UUPSUpgradeable_init();
+       __Cube3IntegrationUpgradeable_init(securityAdmin);
+   }
+
+    // upgradeability will be covered in a later section
+    function _authorizeUpgrade(address newImplementation) internal virtual override onlySecurityAdmin {
+        _preAuthorizeNewImplementation(newImplementation);
+    }
+
+}
+```
+
+
 ---
 
 `Cube3Integration.sol` inherits from `SecurityAdmin2Step.sol`, whereas `Cube3IntegrationUpgradeable.sol` inherits from `SecurityAdmin2StepUpgradeable.sol`. This access control pattern is based on OpenZeppelin's  where the new admin account needs to call a function to accept the transfer of the Security Admin account.
