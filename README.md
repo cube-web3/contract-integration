@@ -35,7 +35,7 @@ forge install cube-web3/cube3-integration @openzeppelin/openzeppelin-contracts @
 
 Next, you'll need to update your `foundry.toml` and `remappings.txt` files.
 
-Update your foundry.toml remappings - the entry should look something like:
+Update your foundry.toml remappings - the entry should look something like. Make sure to include the `auto_detect_remappings` line:
 
 ```
 remappings = [
@@ -45,11 +45,7 @@ remappings = [
     "@openzeppelin/contracts-upgradeable=lib/openzeppelin-contracts/contracts/",
     "cube3/=lib/cube3-integration/contracts/"
 ]
-```
 
-Add the following line to your `foundry.toml` file.
-
-```
 auto_detect_remappings = false
 ```
 
@@ -61,7 +57,6 @@ Then update your `remappings.txt `file.
 ```shell
 forge remappings > remappings.txt
 ```
-
 
 ---
 
