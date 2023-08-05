@@ -1,9 +1,14 @@
-# Smart Contract Integration
+# CUBE3 Smart Contract Integration
 
-Connecting your smart contracts to the CUBE3 protocol
+Connecting your smart contracts to the CUBE3 protocol.  The following guide offers a detailed guide for integrating your smart contracts with the CUBE3 protocol.  The guide is broken down into the following sections:
+
+1. [Integration Overview](#integration-overview)
+2. [Integration Guide](#integration-guide)
+3. [Testing](#testing)
+4. [Protocol Overview](#protocol-overview)
 
 
-## Integration Overview
+# Integration Overview
 
 The following section describe the steps for creating an integration:
 - Add the CUBE3 contracts to your codebase
@@ -16,6 +21,14 @@ The following section describe the steps for creating an integration:
 - [Optional] Update the Security Admin account
 - Register for the CUBE3 service, apply for your registrar token, and register your integration on-chain
 - [Optional] Enable/Disable the protection status of your protected functions
+
+For a standalone integration, your contract will inherit from `Cube3Integration.sol`. If your contracts use a proxy pattern, you'll need to inherit from `Cube3IntegrationUpgradeable.sol`.  
+
+CUBE3 Smart Contracts use Solidity version `0.8.19`.
+
+<br>
+
+# Integration Guide
 
 ## Step 1: Install the CUBE3 contracts using your package manager of choice
 
@@ -43,7 +56,7 @@ remappings = [
     "ds-test/=lib/forge-std/lib/ds-test/src/",
     "@openzeppelin/contracts=lib/openzeppelin-contracts/contracts/",
     "@openzeppelin/contracts-upgradeable=lib/openzeppelin-contracts/contracts/",
-    "cube3/=lib/cube3-integration/contracts/"
+    "cube3/=lib/cube3-integration/"
 ]
 
 auto_detect_remappings = false
@@ -67,7 +80,7 @@ Follow section 2.1 if your integration is a standalone contract, or 2.2 if you'r
 Below is an example of inheriting the Cube3Integration.sol contract into a standalone contract. Cube3Integration.sol inherits from SecurityAdmin2Step.sol, which sets the default Security Admin as the deployer.
 
 ```solidity
-import {Cube3Integration} from "cube3/Cube3Integration.sol";
+import {Cube3Integration} from "cube3/contracts/Cube3Integration.sol";
 
 contract MyIntegration is Cube3Integration {
     ...
@@ -84,7 +97,7 @@ Unlike the standalone implementation of `Cube3Integration.sol` that inherits `Se
 Eg:
 
 ```solidity
-import {Cube3IntegrationUpgradeable} from "cube3/upgradeable/Cube3IntegrationUpgradeable.sol";
+import {Cube3IntegrationUpgradeable} from "cube3/contracts/upgradeable/Cube3IntegrationUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 contract MyIntegrationUpgradeable is UUPSUpgradeable, Cube3IntegrationUpgradeable {
@@ -119,7 +132,7 @@ This step is marked as [Optional] because the contract can still be managed with
 /// @notice Explain to an end user what this does
 /// @dev Starts the security admin transfer.
 /// @dev Can only be called by the current _securityAdmin.
-/// @dev Overridden functions MUST include {onlySecurityAdmin} modifier to maintain security functionalitys.
+/// @dev Overridden functions MUST include {onlySecurityAdmin} modifier to maintain security functionality
 /// @dev No need for Zero address validation as the Zero address cannot call {acceptSecurityAdministration}
 ///      and _pendingSecurityAdmin can be overwritten.
 /// @param newAdmin The address of the account waiting to accept the {_securityAdmin} role.
@@ -214,22 +227,36 @@ function supportsInterface(
 }
 ```
 
-Using super.supportsInterface(interfaceId) is the same as AccessControl.supportsInterface(interfaceId) || Cube3Integration.supportsInterface(interfaceId) dues to linearization. It will first call Cube3Integration's implementation due to the linearization order. Because Cube3Integration also uses the super keyword, it will then call AccessControl's implementation.
-Step 6: Deploy your contracts
+Using `super.supportsInterface(interfaceId)` is the same as `AccessControl.supportsInterface(interfaceId) || Cube3Integration.supportsInterface(interfaceId)` dues to linearization. It will first call Cube3Integration's implementation due to the linearization order. Because Cube3Integration also uses the `super` keyword, it will then call AccessControl's implementation.
+
+### Step 6: Deploy your contracts
+
 Deploy your contracts to your network of choice, using your preferred tooling, eg. Hardhat, Foundry etc.
-If utilizing a proxy, and deploying via hardhat, it's likely you're using the Hardhat Upgrades PLugin. For security purposes the immutable variable _self is set in the Cube3IntegrationUpgradeable constructor during the integration's implementation contract's deployment.
+
+If utilizing a proxy, and deploying via hardhat, it's likely you're using the Hardhat Upgrades Plugin. For security purposes the immutable variable `_self` is set in the Cube3IntegrationUpgradeable constructor during the integration's implementation contract's deployment.
+
+```solidity
 // Cube3IntegrationUpgradeable.sol
 constructor() {
   _self = address(this);
 }
+```
+
 This creates a reference to the integration's own implementation address that's stored in the contract's bytecode, so is not subject to being bypassed via a delegate call that would read from the caller's state.
 As such, we need to tell the plugin to allow the constructor using the unsafeAllow option when deploying the proxy.
+
+```javascript
 {
   ...opts,
   initializer: 'initialize',
   unsafeAllow: ['constructor', 'state-variable-immutable'],
 }
+```
+
 Which will show a warning like the following:
+
+
+```shell
 Warning: Potentially unsafe deployment of test/foundry/dummy/DummyIntegrationTransparent.sol:DummyIntegrationTransparent
 ​
 You are using the `unsafeAllow.state-variable-immutable` flag.
@@ -237,3 +264,108 @@ You are using the `unsafeAllow.state-variable-immutable` flag.
 Warning: Potentially unsafe deployment of test/foundry/dummy/DummyIntegrationTransparent.sol:DummyIntegrationTransparent
 ​
 You are using the `unsafeAllow.constructor` flag.
+```
+
+# Unit Testing
+
+## Foundry
+
+For unit testing with Foundry, a set of Mock contracts are available that simulate the CUBE3 protocol contracts. These can be imported from `cube3/test/foundry/utils/` and are as follows.
+
+```
+import {Cube3ProtocolTestUtils} from "cube3/test/foundry/utils/deploy.sol";
+```
+
+The `Cube3ProtocolTestUtils` inherits Foundry's `Test` contracts, so there's no need to explicitly import them if using the `Cube3ProtocolTestUtils` contract. The utils include the `_deployMockCube3Protocol()` function, which deploys a mock router and gatekeeper to the expected addressed. Example usage:
+
+```solidity
+contract YourTest is Cube3ProtocolTestUtils {
+
+    function setUp() public {
+        _deployMockCube3Protocol();
+    }
+
+    // unit tests
+
+}
+```
+
+In order to deploy your own integration, the protocol contract's need to be present, or the Cube3Integration constructor will revert.
+
+## Hardhat
+
+
+<br>
+
+# The CUBE3 protocol
+
+## Introduction
+
+Making use of CUBE3's RASP (Runtime Application Self Protection) functionality requires that your smart contracts be integrated with the CUBE3 protocol on-chain.  Creating your integration involves the following steps:
+
+- Inheriting from a CUBE3 base contract.  This will be the Cube3Integration.sol contract if yours is a standalone contract implementation, or Cube3IntegrationUpgradeable.sol if you're using a proxy pattern.
+- Deploying your integration to a supported network - see the list of supported networks [here]().
+- Decorating the functions you wish to protect with the cube3Protected modifier and including the cube3SecurePayload as a function argument (covered in [link here])
+- Creating an account with CUBE3 and registering your integration on-chain with the CUBE3 protocol (covered in [link here]).
+
+For the sake of clarity, any mention of "an integration" or "your integration" from this point onwards refers to your deployed smart contract/s that have inherited from one of the CUBE3 base contracts.
+
+Both CUBE3 base contracts share the same interface:
+
+```solidity
+interface ICube3Integration {
+    event Cube3IntegrationDeployment(address indexed self, address indexed admin);
+    event StandaloneFunctionProtectionStatusUpdated(bytes4[] fnSelectors, bool[] enabled);
+
+    function registerIntegrationWithCube3(
+        bytes calldata registrarSignature,
+        bytes4[] calldata enabledByDefaultFnSelectors
+    ) external;
+    function setFunctionProtectionStatus(bytes4[] calldata fnSelectors, bool[] calldata isEnabled) external;
+    function self() external view returns (address, address);
+    function isFunctionProtectionEnabled(bytes4 fnSelector) external view returns (bool);
+    function batchIsFunctionProtectionEnabled(bytes4[] calldata fnSelectors) external view returns (bool[] memory);
+}
+```
+
+This guide will walk you through the steps required to integrate your smart contract with the CUBE3 protocol. After laying out basic installation instructions for including the CUBE3 contracts in your code, this guide will present the steps required to integrate as either a standalone, or an upgradeable contract. Should your contract use a proxy pattern, you'll be inheriting from the upgradeable base contract ( `Cube3IntegrationUpgradeable.sol` ). If not, you'll be inheriting from the standalone base contract ( `Cube3Integration.sol` ). It's very important to include the correct contract, as the standalone contract includes code that will force any `delegatecalls` to revert, meaning it is incompatible with all proxy patterns.
+
+**Important Considerations**:
+
+- An upgradeable/proxy integration MUST be registered with the CUBE3 protocol, even if function-level protection remains disabled, or else calls to protected functions will revert. A standalone integration will not revert calls if the contract remains unregistered.
+- An upgradeable integration MUST follow the CUBE3 upgradeable integration guidelines, ensuring that new implementations are correctly registered on-chain.
+- The CUBE3 integration contracts leverage OpenZeppelin library contracts, namely: ERC165, `ERC165Upgradeable`, and `ERC165CheckerUpgradeable`. This should be taken into consideration when inheriting from the abstract CUBE3 contracts.
+
+## Protocol Overview
+
+In order to understand the process of creating an integration, it's important to have a high-level understanding of how the protocol operates.  For a more detailed and/or technical explanation, please refer to the CUBE3 Protocol Documentation [link here].
+
+The CUBE3 protocol provides access to a suite of security modules that can be used to add additional layers of security to your contract's on-chain activities. Security modules are designed and deployed by CUBE3. In addition to the protocol being reviewed by independent security auditors, each module that's deployed will undergo its own independent review.
+
+![protocol-image](./docs/images/simple_architecture.png)
+
+### The Router
+
+1. The CUBE3 Router is the only contract that your integration will interact with directly. As far as an integration is concerned, the Router has 3 primary functions:
+1. Controls what integrations are permitted to register with the protocol.
+1. Prevents unauthorized accounts/contracts from accessing the security modules.
+Routes requests to the appropriate security module.
+
+### The GateKeeper
+
+The GateKeeper is a decentralized storage contract that keeps track of which integrations are registered with the protocol, along with their authorization status. Unlike a standalone integration, a proxy/upgradeable integration does not store the function-level protection status in its own contract. For security reasons, the protection status of each function is stored in the GateKeeper.
+
+### Security Modules
+
+The security modules provide application-specific functionality. For example, the Cube3SignatureModule.sol contract verifies the signature contained in the cube3SecurePayload that's passed in during a call to an integration's protected function. 
+
+This signature is generated by the CUBE3 Risk API, and is used to verify that the request is coming from an authorized account and that the transaction is valid. The Cube3SignatureModule.sol contract is the only security module that's currently available, but more will be added in the future.
+
+### The Registry
+
+The registry stores signing authority's for each integration. A signing authority is the externally-owned account (EOA) generated for each integration, and is used to sign the cube3SecurePayload that's passed in during a call to an integration's protected function. The registry is a centralized component of the protocol, and is maintained by CUBE3. Private keys belonging to each signing authority's public-private keypair is managed by the CUBE3 KMS.
+
+### Integration
+
+The integration contract is the contract that you'll be deploying to the network. It's the contract that inherits from either the `Cube3Integration.sol` or `Cube3IntegrationUpgradeable.sol` contracts. Privileged functions have access control implemented by `SecurityAdmin2Step.sol` or `SecurityAdmin2StepUpgradeable.sol`. The Security Admin is an account with elevated permissions and has the ability to register the integration with the protocol, as well as setting the function-level protection status of each protected function.
+
