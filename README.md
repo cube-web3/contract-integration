@@ -268,6 +268,8 @@ You are using the `unsafeAllow.constructor` flag.
 
 # Unit Testing
 
+An important consideration when unit testing is that the estimated gas usage for any protocol interactions will not be accurate.
+
 ## Foundry
 
 For unit testing with Foundry, a set of Mock contracts are available that simulate the CUBE3 protocol contracts. These can be imported from `cube3/test/foundry/utils/` and are as follows.

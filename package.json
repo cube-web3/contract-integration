@@ -1,35 +1,36 @@
 {
-  "name": "hardhat-template",
-  "version": "1.0.0",
-  "description": "this is a hardhat template",
+  "name": "@cube-web3/cube3-integration",
+  "version": "0.0.1",
+  "description": "CUBE3 integration smart contracts",
   "main": "hardhat.config.ts",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:cube-web3/cube3-integration.git"
+  },
+  "homepage": "https://cube3.ai",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "scripts": {
     "compile": "hardhat compile && hardhat typechain",
     "test": "hardhat test",
     "coverage: hardhat": "hardhat coverage",
     "prettier": "npx prettier -w .",
-    "prepare": "husky install",
     "build:ts": "tsc -b",
     "husky:pre-commit": "npm run prettier && git add .",
     "slither": "slither . --filter-paths \"lib|test|node_modules\"",
     "docs:host": "forge doc --serve --port 4000",
-    "coverage:foundry": "forge coverage --report lcov && genhtml lcov.info --branch-coverage --output-dir coverage",
-    "predeploy": "source .env",
-    "hardhat:deploy:local": "npx hardhat run --network localhost scripts/deployProtocol.ts",
-    "hardhat:deploy:demo": "npx hardhat run --network localhost scripts/deployProtocolWithDemo.ts",
-    "deploy:local:cube3": "SIMULATION=0 forge script scripts/foundry/AnvilDeploy.s.sol -vvvvv --rpc-url http://127.0.0.1:8545 --broadcast --optimizer-runs 200 --ffi",
-    "simulate:local:cube3": "SIMULATION=1 forge script scripts/foundry/AnvilDeploy.s.sol -vvvvv --rpc-url http://127.0.0.1:8545 --optimizer-runs 200",
-    "deploy:local:dummy": "SIMULATION=0 forge script scripts/foundry/DeployDummyIntegration.s.sol --rpc-url http://127.0.0.1:8545 --broadcast --ffi",
-    "deploy:goerli:cube3": "SIMULATION=0 source .env && forge script scripts/foundry/GoerliDeploy.s.sol -vvvvv --rpc-url $GOERLI_RPC_URL --optimizer-runs 200 --broadcast --ffi",
-    "simulate:goerli:cube3": "SIMULATION=1 source .env && forge script scripts/foundry/GoerliDeploy.s.sol -vvvvv --rpc-url $GOERLI_RPC_URL --optimizer-runs 200",
-    "deploy:local:mock": "forge script scripts/foundry/DeployMockProtocol.s.sol -vvvvv --rpc-url http://127.0.0.1:8545 --broadcast"
+    "coverage:foundry": "forge coverage --report lcov && genhtml lcov.info --branch-coverage --output-dir coverage"
   },
   "keywords": [
     "hardhat",
     "solidity",
-    "web3"
+    "web3",
+    "cube3",
+    "security",
+    "rasp"
   ],
-  "author": "Cube3.ai",
+  "author": "CUBE3.ai",
   "license": "MIT",
   "installConfig": {
     "hoistingLimits": "dependencies"
