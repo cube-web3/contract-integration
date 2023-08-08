@@ -92,6 +92,8 @@ contract MyIntegration is Cube3Integration {
 
 ### Step 2.2: Upgradeable/proxy integration
 
+**Important Note: This example is not an exhaustive demonstration of using the CUBE3 upgradeable contracts for all possible proxy patterns, but rather demonstrating usage in a single scenario.**
+
 Below is an example of inheriting the `Cube3IntegrationUpgradeable.sol` contract into an upgradeable contract. Because initializers are not linearized by the compiler like constructors, we want to avoid initializing the same contract twice. As such, we follow OpenZeppelin's standards for Multiple Inheritance utilizing the `_init` and `_init_unchained` pattern. Upgradeable integrations will call `__Cube3IntegrationUpgradeable_init(...args) `inside their own initialize functions.
 Unlike the standalone implementation of `Cube3Integration.sol` that inherits `SecurityAdmin2Step.sol`, which sets the default Security Admin as the deployer, the upgradeable version requires the Security Admin to be set explicitly. This provides flexibility for proxy patterns, such as the minimal forwarder proxy, that utilize a factory contract, whereby the deployer would be the factory contract if it was set implicitly. The integration **MUST** initialize Cube3IntegrationUpgradeable in its initialize function to set the protocol contract addresses and the security admin. 
 Eg:
@@ -121,18 +123,54 @@ contract MyIntegrationUpgradeable is UUPSUpgradeable, Cube3IntegrationUpgradeabl
 }
 ```
 
+### Step 3: Add the {cube3Protected} modifier to your functions
 
----
+Decorate the functions you wish to protect with the cube3Protected modifier. Both Cube3Integration.sol and Cube3IntegrationUpgradeable.sol contain the definition for the cube3Protected modifier. The modifier accepts a cube3SecurePayload of type bytes and its definition is as follows (implementation details omitted for brevity):
+```solidity
+modifier cube3Protected(bytes calldata cube3SecurePayload) {
+    ...
+    -;
+}
+```
 
-`Cube3Integration.sol` inherits from `SecurityAdmin2Step.sol`, whereas `Cube3IntegrationUpgradeable.sol` inherits from `SecurityAdmin2StepUpgradeable.sol`. This access control pattern is based on OpenZeppelin's  where the new admin account needs to call a function to accept the transfer of the Security Admin account.
+The modifier uses the calldata storage location as it's strictly read-only. This further reduces the gas overhead of the function call. The cube3SecurePayload should be included as a parameter in the protected function's signature, such that it can be passed on to the modifier.
+Eg.
+```solidity
+function mint(uint256 tokenId, string memory name, bytes calldata cube3SecurePayload) 
+external cube3Protected(cube3SecurePayload) {
+    // ...
+}
+```
 
-This step is marked as [Optional] because the contract can still be managed without altering your contract's access control patterns.  The implication is simply that the `_securityAdmin` account is assigned to contract's deployer and can be left as is, or transferred to a separate address. This can be done using the external `{transferSecurityAdministration}` made available by the selected base contract.
+NB: The protected function's definition MUST include the bytes calldata cube3SecurePayload as the last argument. If the payload is not included as the last argument, any calls to the Router will fail and the transaction will revert.
+Eg.
+```solidity
+function mint(uint256 qty, bytes calldata cube3SecurePayload) external payable cube3Protected(cube3SecurePayload) {
+    // function logic ommitted for brevity
+}
+
+function burn(uint256 tokenId, bytes calldata cube3SecurePayload) external cube3Protected (cube3SecurePayload) {
+    // function logic ommitted for brevity
+}
+```
+
+This adds RASP functionality to the burn and mint functions shown above, however the protection status will need to be updated to enable protection - this process is covered in the steps that follow. Note that the modifier can be applied to both payable and non-payable functions.
+
+
+### Step 4: [Optional] Modify your access control patterns for the Security Admin
+
+**Important Note: This is not an exhaustive guide for integrating with all access control patterns, but rather a demonstration of how to integrate with a few common patterns.**
+
+Cube3Integration.sol inherits from SecurityAdmin2Step.sol, whereas Cube3IntegrationUpgradeable.sol inherits from SecurityAdmin2StepUpgradeable.sol. This access control pattern is based on OpenZeppelin's Ownable2Step where the new admin account needs to call a function to accept the transfer of the Security Admin account.
+This step is marked as [Optional] because the contract can still be managed without altering your contract's access control patterns.  The implication is simply that the _securityAdmin account is assigned to contract's deployer and can be left as is, or transferred to a separate address. 
+
+This can be done using the external {transferSecurityAdministration} made available by the selected base contract.
 
 ```solidity
 /// @notice Explain to an end user what this does
 /// @dev Starts the security admin transfer.
 /// @dev Can only be called by the current _securityAdmin.
-/// @dev Overridden functions MUST include {onlySecurityAdmin} modifier to maintain security functionality
+/// @dev Overridden functions MUST include {onlySecurityAdmin} modifier to maintain security functionalitys.
 /// @dev No need for Zero address validation as the Zero address cannot call {acceptSecurityAdministration}
 ///      and _pendingSecurityAdmin can be overwritten.
 /// @param newAdmin The address of the account waiting to accept the {_securityAdmin} role.
@@ -140,7 +178,7 @@ function transferSecurityAdministration(address newAdmin) public virtual onlySec
     _pendingSecurityAdmin = newAdmin;
     emit SecurityAdminTransferStarted(securityAdmin(), newAdmin);
 }
-​
+
 /// @dev Encapsulates the transfer and event emission for easy reuse.
 /// @dev Can be used by inheritor to integrate with desired access control patterns.
 function _transferSecurityAdministration(address newAdmin) internal {
@@ -149,19 +187,21 @@ function _transferSecurityAdministration(address newAdmin) internal {
     _securityAdmin = newAdmin;
     emit SecurityAdministrationTransferred(oldAdmin, newAdmin);
 }
-​
+
 /// @dev Hook that is called before the security admin is set to a new address.
 function _beforeSecurityAdminTransfer(address newAdmin) internal virtual {}
 ```
-​
-The inclusion of SecurityAdmin2Step is intentionally different from OpenZeppelin's Ownable2Step to avoid any potential conflicts should you choose to use that access control pattern.  The _securityAdmin is set to the deployer's address in the `Cube3Integration.sol` contract's constructor, or set explicitly in `{Cube3IntegrationUpgradeable-initialize}`.  This account has elevated permissions, allowing it to enable/disable the protection status of functions decorated with the cube3Protected modifier.
 
-```
+
+The inclusion of SecurityAdmin2Step is intentionally different from OpenZeppelin's Ownable2Step to avoid any potential conflicts should you choose to use that access control pattern.  The `_securityAdmin` is set to the deployer's address in the `Cube3Integration.sol` contract's constructor, or set explicitly in `{Cube3IntegrationUpgradeable-initialize}`.  This account has elevated permissions, allowing it to enable/disable the protection status of functions decorated with the cube3Protected modifier.
+
+
+```solidity
 // SecurityAdmin2Step.sol || SecurityAdmin2StepUpgradeable.sol
-​
+
 // the current security admin for the derived contract
 address private _securityAdmin;
-​
+
 // the pending security admin for the derived contract, once accepting the role will be transferred to the _securityAdmin
 address private _pendingSecurityAdmin;
 ```
@@ -169,10 +209,11 @@ address private _pendingSecurityAdmin;
 Presented below is an example integration using OpenZeppelin's Ownable access pattern. In this scenario, the owner and _securityAdmin accounts are aligned to be the same EOA. 
 Please note: this is not a recommendation or suggestion of best practices, it is simply a demonstration of how to override the internal functions provided. In this example, it should also be noted that while the ownership would be transferred to the newAdmin address, whereas the EOA would still need to call acceptSecurityAdministration. It's up to you to determine how the Security Admin account is managed.
 
-```solidity
+
+```solidiy
 contract ExampleIntegrationOwnable is Cube3Integration, Ownable {
     constructor() Cube3Integration() {}
-​
+
     function transferSecurityAdministration(address newAdmin) public override
     onlySecurityAdmin {
         _transferOwnership(newAdmin);
@@ -180,25 +221,26 @@ contract ExampleIntegrationOwnable is Cube3Integration, Ownable {
     }
 }
 ```
-Another example use/s OpenZeppelin's AccessControl. This example is more nuanced, and assigns the example contract's deployer the EXAMPLE_ADMIN_ROLE, this role would then be used to execute functions that require elevated privileges in the example contract.  Should the contract's deployer want the _securityAdmin and EXAMPLE_ADMIN_ROLE to be the same account, the role can be granted and revoked in the _beforeSecurityAdminTransfer hook.
+
+Another example use/s OpenZeppelin's AccessControl. This example is more nuanced, and assigns the example contract's deployer the `EXAMPLE_ADMIN_ROLE`, this role would then be used to execute functions that require elevated privileges in the example contract.  Should the contract's deployer want the `_securityAdmin` and `EXAMPLE_ADMIN_ROLE` to be the same account, the role can be granted and revoked in the `_beforeSecurityAdminTransfer` hook.
 
 ```solidity
 contract ExampleIntegrationAccessControl is Cube3Integration, AccessControl {
     bytes32 constant EXAMPLE_ADMIN_ROLE = keccak256(abi.encode("EXAMPLE_ADMIN_ROLE"));
-​
+
     // deployer is security admin by default
     constructor(address Cube3RouterProxy) Cube3Integration() {
         _grantRole(EXAMPLE_ADMIN_ROLE, msg.sender);
     }
-​
-​
+
+
     function transferSecurityAdministration(address newAdmin) public override 
     onlySecurityAdmin onlyRole(EXAMPLE_ADMIN_ROLE) {
         _grantRole(EXAMPLE_ADMIN_ROLE, newAdmin);
         _revokeRole(EXAMPLE_ADMIN_ROLE, msg.sender);
         _transferSecurityAdministration(newAdmin);
     }
-​
+
     function supportsInterface(
         bytes4 interfaceId
     ) public view virtual override(AccessControl, Cube3Integration) returns (bool) {
@@ -208,9 +250,11 @@ contract ExampleIntegrationAccessControl is Cube3Integration, AccessControl {
         return super.supportsInterface(interfaceId);
     }
 }
+
 ```
 
-An important note for the above implementation is that both OpenZeppelin's AccessControl and Cube3Integration implement ERC165 and, as such, the {supportsInterface} function needs to be overridden. 
+An important note for the above implementation is that both OpenZeppelin's AccessControl and Cube3Integration implement ERC165 and, as such, the {supportsInterface} function needs to be overridden.
+
 
 ### Step 5: Supporting ERC165
 
@@ -264,6 +308,146 @@ You are using the `unsafeAllow.state-variable-immutable` flag.
 Warning: Potentially unsafe deployment of test/foundry/dummy/DummyIntegrationTransparent.sol:DummyIntegrationTransparent
 ​
 You are using the `unsafeAllow.constructor` flag.
+```
+
+### Step 7: Register your integration on-chain with the Cube3Router
+
+This step is necessary to connect your smart contract to CUBE3's on-chain protocol.  
+
+Registration on-chain can only be performed by the  Security Admin EOA. In addition to registering your integration, you have the option to enable the protection status for each function that makes use of the cube3protected modifier, which is disabled by default - ie. it is opt-in.
+
+Once your contract is deployed, you need to call the registerIntegrationWithCube3 function on your contract to establish a connection to the CUBE3 protocol. See `{Cube3Integration-registerIntegrationWithCube3}` for implementation details. This registers your contract as an integration with the Cube3Router, which is responsible for routing your users' transactions to the desired security modules. If you enable function-level protection before registering your integration, any calls to functions protected by the cube3Protected modifier with function protection enabled will revert.
+
+When you register your contract (thus creating a CUBE3 integration), you can choose to enable none, some, or all of your protected functions by default. 
+
+Before you can register on-chain you need to acquire a registrar token from the CUBE3 web platform.  Follow the instructions found [add link here]. Once you've acquired the token, your options are as follows:
+
+#### Option 1: Register your integration and leave all function protection disabled.
+
+To do this, you'll pass an empty `bytes4[]` (`bytes4` array) to  registerIntegrationWithCube3. 
+An example, using javascript, is as follows:
+
+```javascript
+import { ethers } from 'ethers';
+import dotenv from 'dotenv'
+
+dotenv.config();
+
+const contractABI = [
+  /* ABI of your smart contract */
+];
+const contractAddress = '/* Your smart contract address */';
+const securityAdminPrivateKey = process.env.SECURITY_ADMIN_PVT_KEY;
+const provider = new ethers.providers.JsonRpcProvider('/* Your Ethereum node URL */');
+const wallet = new ethers.Wallet(securityAdminPrivateKey, provider);
+
+const registrarToken = process.env.REGISTRAR_TOKEN;
+
+async function callRegisterIntegrationWithCube3() {
+  const contract = new ethers.Contract(contractAddress, contractABI, wallet);
+  const enabledByDefaultFnSelectors: bytes4[] = [];
+
+  try {
+    const tx = await contract.registerIntegrationWithCube3(registrarToken, enabledByDefaultFnSelectors);
+    const receipt = await tx.wait();
+    console.log('Transaction successful:', receipt);
+  } catch (error) {
+    console.error('Transaction failed:', error);
+  }
+}
+
+callRegisterIntegrationWithCube3();
+
+```
+
+Passing an empty array will ensure that CUBE3 protection is left disabled for each function. You can then, at a time of your choosing, selectively enable which functions you wish to enable protection for.
+
+
+#### Option 2: Enable some, or all, of your functions by default
+
+To do this, pass a `bytes4[]` array containing the desired function selectors for each function you wish to enable protection for.
+As an example, let's say your smart contract has the following two functions that you're applying the cube3protected modifier to:
+
+```solidity
+function registerForLottery(address accountToRegister, bytes calldata cube3securePayload) public cube3protected(cube3securePayload) {
+    // function logic ommitted for brevity
+}
+
+function castVote(address candidate, bool supported, bytes calldata cube3securePayload) public cube3protected(cube3securePayload) {
+    // function logic ommitted for brevity
+}
+```
+
+The function selectors for the two functions are as follows:
+
+`registerForLottery(address,bytes) : 0xffa86eac`
+
+`castVote(address,bool,bytes) : 0x7da26bbe`
+
+So, if we want to enable CUBE3 protection for both of these functions by default, we'll pass in `0xffa86eac` and `0x7da26bbe` in the `bytes4[]`. Eg.
+
+```javascript
+import { ethers } from 'ethers';
+
+const contractABI = [
+  /* ABI of your smart contract */
+];
+const contractAddress = '/* Your smart contract address */';
+const securityAdminPrivateKey = process.env.SECURITY_ADMIN_PVT_KEY;
+const provider = new ethers.providers.JsonRpcProvider('/* Your Ethereum node URL */');
+const wallet = new ethers.Wallet(securityAdminPrivateKey, provider);
+
+const registrarToken = process.env.REGISTRAR_TOKEN;
+
+async function callRegisterIntegrationWithCube3() {
+  const contract = new ethers.Contract(contractAddress, contractABI, wallet);
+  const enabledByDefaultFnSelectors: bytes4[] = ['0xffa86eac', '0x7da26bbe'];
+
+  try {
+    const tx = await contract.registerIntegrationWithCube3(registrarToken,enabledByDefaultFnSelectors);
+    const receipt = await tx.wait();
+    console.log('Transaction successful:', receipt);
+  } catch (error) {
+    console.error('Transaction failed:', error);
+  } 
+}
+
+callRegisterIntegrationWithCube3();
+```
+
+### Step 8: Update the protection status of your functions
+
+At any given point, once your integration has been registered, you have granular control over which functions you'd like to enable/disable. You can update the status of an individual function, or multiple functions at the same time.
+
+To change the status of multiple functions at the same time, you can call: `function setFunctionProtectionStatus( bytes4[] calldata fnSelectors, bool[] calldata isEnabled)`, where the boolean at any given index in the `bool[]` applies to the function selector at the corresponding index in the fnSelectors `bytes4[] `array.
+
+```javascript
+import { ethers } from 'ethers';
+
+const contractABI = [
+  /* ABI of your smart contract */
+];
+const contractAddress = '/* Your smart contract address */';
+const securityAdminPrivateKey = '/* Your private key */';
+const provider = new ethers.providers.JsonRpcProvider('/* Your Ethereum node URL */');
+const wallet = new ethers.Wallet(securityAdminPrivateKey, provider);
+
+// In this example, we enable `0xffa86eac` and disable `0x7da26bbe`
+async function setFunctionProtectionStatus() {
+  const contract = new ethers.Contract(contractAddress, contractABI, wallet);
+  const fnSelectors: bytes4[] = ['0xffa86eac', '0x7da26bbe'];
+  const isEnabled: boolean[] = [true, false];
+
+  try {
+    const tx = await contract.setFunctionProtectionStatus(fnSelectors, isEnabled);
+    const receipt = await tx.wait();
+    console.log('Transaction successful:', receipt);
+  } catch (error) {
+    console.error('Transaction failed:', error);
+  }
+}
+
+setFunctionProtectionStatus();
 ```
 
 # Unit Testing
