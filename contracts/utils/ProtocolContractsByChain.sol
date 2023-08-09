@@ -15,18 +15,14 @@ library ProtocolContractsByChain {
             // anvil
             routerProxy = 0x269D11C666450B896b3e1f867FB6D86805c57D8F;
             gateKeeper = 0xF66e74DC65d9a54c0867213ec0885576656e2D28;
-        } else if (block.chainid == 1) {
-            // mainnet - TODO: verify these after mainnet fork tests
-            routerProxy = 0xF4b3626BbDbAeF3c8075E662DBb5c5dD1a0E3516;
-            gateKeeper = 0x81Ee23998618846D8Bd3d8ECDF51C71aa2E95D79;
         } else if (block.chainid == 5) {
             // goerli
             routerProxy = 0x5ec02641b145A7FdE91261B983fd1743Cb37b914;
             gateKeeper = 0x5946959A7247F96EC4657ca0272C558f0aC11CC3;
-        } else if (block.chainid == 137) {
-            // polygon
-            routerProxy = 0xF4b3626BbDbAeF3c8075E662DBb5c5dD1a0E3516;
-            gateKeeper = 0x81Ee23998618846D8Bd3d8ECDF51C71aa2E95D79;
+        } else if (block.chainid == 11155111) {
+            // sepolia
+            routerProxy = 0x3183AeD697c5076Ad46a3Aad0f0c0D2f41ac195F;
+            gateKeeper = 0x0a3957159192522c615C8F7396f0BA2A9a83F61f;
         } else {
             revert("Unrecognized chain id");
         }

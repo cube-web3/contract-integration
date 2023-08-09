@@ -10,6 +10,11 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
+  "files": [
+    "contracts",
+    "docs",
+    "test"
+  ],
   "scripts": {
     "compile": "hardhat compile && hardhat typechain",
     "test": "hardhat test",
