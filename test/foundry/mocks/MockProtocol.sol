@@ -107,6 +107,7 @@ contract MockCube3GateKeeper {
         address integrationSelf,
         bytes4 fnSelector
     ) external view returns (bool) {
+      (integrationSelf);
         return _integrationProxyFunctionProtectionStatus[msg.sender][fnSelector];
     }
 
