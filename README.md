@@ -55,7 +55,7 @@ remappings = [
     "forge-std/=lib/forge-std/src/",
     "ds-test/=lib/forge-std/lib/ds-test/src/",
     "@openzeppelin/contracts=lib/openzeppelin-contracts/contracts/",
-    "@openzeppelin/contracts-upgradeable=lib/openzeppelin-contracts/contracts/",
+    "@openzeppelin/contracts-upgradeable=lib/openzeppelin-contracts-upgradeable/contracts/",
     "cube3/=lib/cube3-integration/"
 ]
 
@@ -555,3 +555,10 @@ The registry stores signing authority's for each integration. A signing authorit
 
 The integration contract is the contract that you'll be deploying to the network. It's the contract that inherits from either the `Cube3Integration.sol` or `Cube3IntegrationUpgradeable.sol` contracts. Privileged functions have access control implemented by `SecurityAdmin2Step.sol` or `SecurityAdmin2StepUpgradeable.sol`. The Security Admin is an account with elevated permissions and has the ability to register the integration with the protocol, as well as setting the function-level protection status of each protected function.
 
+---
+
+# Licensing
+The primary license for the smart contracts is the MIT License, see [LICENSE](./LICENSE).
+
+# Disclaimer
+These smart contracts are being provided as is. No guarantee, representation or warranty is being made, express or implied, as to the safety or correctness of the smart contracts.

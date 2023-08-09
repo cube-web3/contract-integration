@@ -33,13 +33,14 @@ contract MockCube3Router {
   }
 
   function supportsInterface(bytes4 interfaceId) public pure returns (bool) {
-
-    return interfaceId == type(ICube3Router).interfaceId; // type(ICube3Router).interfaceId
+    return interfaceId == type(ICube3Router).interfaceId || interfaceId == 0x01ffc9a7; // erc165; 
   }
 }
 
 
 contract MockCube3GateKeeper {
+
+  mapping(address => mapping(bytes4 => bool)) private _integrationProxyFunctionProtectionStatus; // integrationProxy => (fnSelector => enabled)
 
   event IntegrationRegistrationStatusUpdated(
     address indexed integrationOrProxy,
@@ -51,6 +52,17 @@ contract MockCube3GateKeeper {
     address indexed integrationOrProxy,
     address indexed integrationOrImplementation,
     ICube3Data.AuthorizationStatus status
+  );
+
+  event ProxyIntegrationFunctionProtectionStatusUpdated(
+      address indexed integration,
+      bytes4[] protectedFnSelectors,
+      bool[] statuses
+  );
+
+  event IntegrationImplementationUpgradeAuthorized(
+      address indexed currentImplementation,
+      address indexed newImplementation
   );
 
   function complete2StepIntegrationRegistration(
@@ -72,8 +84,34 @@ contract MockCube3GateKeeper {
   function preRegisterAsIntegration(address integrationSelf) public {
     emit IntegrationRegistrationStatusUpdated(msg.sender, integrationSelf, ICube3Data.RegistrationStatus.PENDING);
   }
+
+  // proxy-integration specific functions
+  function integrationUpdateProxyFunctionProtectionStatus(
+        address integrationSelf,
+        bytes4[] calldata integrationFnSelectors,
+        bool[] calldata status
+    ) external {
+        (integrationSelf);
+        require(integrationFnSelectors.length == status.length, "GK07: array length mismatch");
+        uint256 len = integrationFnSelectors.length;
+        for (uint i; i < len; ) {
+            _integrationProxyFunctionProtectionStatus[msg.sender][integrationFnSelectors[i]] = status[i];
+            unchecked {
+                ++i;
+            }
+        }
+        emit ProxyIntegrationFunctionProtectionStatusUpdated(msg.sender, integrationFnSelectors, status);
+    }
+
+    function preAuthorizeImplementationUpgrade(
+        address integrationSelf,
+        address newImplementation
+    ) external {
+        require(integrationSelf != msg.sender, "GK09: only proxy");
+        emit IntegrationImplementationUpgradeAuthorized(integrationSelf, newImplementation);
+    }
  
   function supportsInterface(bytes4 interfaceId) public pure returns (bool) {
-   return interfaceId == type(ICube3GateKeeper).interfaceId;
+   return interfaceId == type(ICube3GateKeeper).interfaceId || interfaceId == 0x01ffc9a7; // erc165;
   }
 }
