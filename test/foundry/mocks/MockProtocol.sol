@@ -106,7 +106,7 @@ contract MockCube3GateKeeper {
     function integrationCheckProxyFunctionProtectionStatusEnabled(
         address integrationSelf,
         bytes4 fnSelector
-    ) external view onlyRegisteredIntegration(integrationSelf) returns (bool) {
+    ) external view returns (bool) {
         return _integrationProxyFunctionProtectionStatus[msg.sender][fnSelector];
     }
 
