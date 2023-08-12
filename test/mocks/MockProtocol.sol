@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import {ICube3Data} from "../../../contracts/interfaces/ICube3Data.sol";
-import {ICube3Router} from "../../../contracts/interfaces/ICube3Router.sol";
-import {ICube3GateKeeper} from "../../../contracts/interfaces/ICube3GateKeeper.sol";
+import {ICube3Data} from "../../contracts/interfaces/ICube3Data.sol";
+import {ICube3Router} from "../../contracts/interfaces/ICube3Router.sol";
+import {ICube3GateKeeper} from "../../contracts/interfaces/ICube3GateKeeper.sol";
 
 contract MockCube3Router {
 

@@ -9,14 +9,6 @@
     "resolveJsonModule": true
   },
   "exclude": ["node_modules"],
-  "include": [
-    "js/**/*.ts",
-    "scripts/**/*",
-    "tasks/**/*",
-    "test/**/*",
-    "typechain/**/*",
-    "types/**/*",
-    "utils/**/*.ts",
-    "hardhat.config.ts"
-  ]
+  "include": ["js/**/*.ts", "scripts/**/*", "tasks/**/*", "test/**/*", "typechain/**/*", "types/**/*", "utils/**/*.ts"],
+  "files": ["./hardhat.config.ts"]
 }
