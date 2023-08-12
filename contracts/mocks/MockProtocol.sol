@@ -5,9 +5,13 @@ import {ICube3Data} from "../../contracts/interfaces/ICube3Data.sol";
 import {ICube3Router} from "../../contracts/interfaces/ICube3Router.sol";
 import {ICube3GateKeeper} from "../../contracts/interfaces/ICube3GateKeeper.sol";
 
+
 contract MockCube3Router {
 
   address internal immutable _gateKeeper;
+
+  string public name = "mock router";
+
   constructor(address gateKeeper) {
     _gateKeeper = gateKeeper;
   }
