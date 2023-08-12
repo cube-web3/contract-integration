@@ -4,7 +4,7 @@ pragma solidity 0.8.19;
 import {Test} from "forge-std/Test.sol";
 
 import {ProtocolContractsByChain} from "../../../contracts/utils/ProtocolContractsByChain.sol";
-import {MockCube3GateKeeper, MockCube3Router} from "../../mocks/MockProtocol.sol";
+import {MockCube3GateKeeper, MockCube3Router} from "../../../contracts/mocks/MockProtocol.sol";
 
 
 abstract contract Cube3ProtocolTestUtils is Test {

@@ -34,7 +34,7 @@ const config: HardhatUserConfig = {
   paths: {
     artifacts: './artifacts',
     cache: './cache',
-    sources: ['./contracts', './test/foundry/mocks'],
+    sources: './contracts',
     tests: './test',
   },
   mocha: {
