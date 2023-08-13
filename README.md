@@ -615,6 +615,24 @@ forge test -vvvv
 
 ## Hardhat
 
+Install the dependencies:
+
+```
+npm install
+```
+
+or
+
+```
+yarn
+```
+
+Run the tests:
+
+```
+yarn hardhat:test
+```
+
 # Licensing
 
 The primary license for the smart contracts is the MIT License, see [LICENSE](./LICENSE).
