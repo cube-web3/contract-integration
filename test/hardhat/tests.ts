@@ -125,13 +125,10 @@ describe('Deploying demo CUBE3 Integrations', () => {
     await expect(await demoIntegrationUpgradeableWithModifier.isFunctionProtectionEnabled(enabledFnSelectors[0])).is
       .true;
 
-    let balance = await demoIntegrationUpgradeableWithModifier.balanceOf(user.address);
-    console.log({ balance });
-
     // mint tokens
     const dummyCube3SecurePayload = new Uint8Array(64);
     await demoIntegrationUpgradeableWithModifier.connect(user).safeMint(MINT_QTY, dummyCube3SecurePayload);
-    balance = await demoIntegrationUpgradeableWithModifier.balanceOf(user.address);
+    const balance = await demoIntegrationUpgradeableWithModifier.balanceOf(user.address);
     await expect(balance).equals(MINT_QTY);
   });
 });
