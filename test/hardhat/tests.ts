@@ -12,6 +12,8 @@ import {
 const MOCK_ROUTER_ADDRESS = '0x42816740Fa2D825FB4fffC4AAeb436ABA87Cc099';
 const MOCK_GATEWAY_ADDRESS = '0xC1d7b7440af58F255eeA1D089eE9E99f904ECd6C';
 
+const MINT_QTY = 2;
+
 describe('Deploying demo CUBE3 Integrations', () => {
   let accounts: SignerWithAddress[];
 
@@ -19,7 +21,7 @@ describe('Deploying demo CUBE3 Integrations', () => {
   let user: SignerWithAddress;
 
   let demoIntegration: DemoIntegrationERC721;
-  let demoIntegrationUpgradeableNoModifier: Contract;
+  let demoIntegrationUpgradeableNoModifier: any; // TODO: fix type
   let demoIntegrationUpgradeableWithModifier: Contract;
 
   before(async () => {
@@ -49,7 +51,7 @@ describe('Deploying demo CUBE3 Integrations', () => {
     const DemoIntegrationUpgradeableNoModifierFactory = await ethers.getContractFactory(
       'DemoIntegrationERC721UpgradeableNoModifier'
     );
-    const upgradeableNoModifierInstance: Contract = await upgrades.deployProxy(
+    demoIntegrationUpgradeableNoModifier = await upgrades.deployProxy(
       DemoIntegrationUpgradeableNoModifierFactory.connect(securityAdmin),
       [securityAdmin.address],
       {
@@ -58,7 +60,7 @@ describe('Deploying demo CUBE3 Integrations', () => {
         unsafeAllow: ['constructor', 'state-variable-immutable'],
       }
     );
-    await upgradeableNoModifierInstance.waitForDeployment();
+    await demoIntegrationUpgradeableNoModifier.waitForDeployment();
   });
 
   it('should succeed calling safeMint on standalone integration with function protection enabled', async () => {
@@ -71,7 +73,20 @@ describe('Deploying demo CUBE3 Integrations', () => {
       .registerIntegrationWithCube3(dummyRegistrarSignature, enabledByDefaultFnSelectors);
 
     const dummyCube3SecurePayload = new Uint8Array(64);
-    await demoIntegration.connect(user).safeMint(2, dummyCube3SecurePayload);
-    await expect(await demoIntegration.balanceOf(user.address)).equals(2);
+    await demoIntegration.connect(user).safeMint(MINT_QTY, dummyCube3SecurePayload);
+    await expect(await demoIntegration.balanceOf(user.address)).equals(MINT_QTY);
+  });
+
+  it('should succeed calling safeMint on an upgradeable integration without the modifier', async () => {
+    const enabledByDefaultFnSelectors: string[] = [];
+    enabledByDefaultFnSelectors.push(demoIntegrationUpgradeableNoModifier.safeMint.fragment.selector);
+
+    const dummyRegistrarSignature = new Uint8Array(65);
+    await demoIntegrationUpgradeableNoModifier
+      .connect(securityAdmin)
+      .registerIntegrationWithCube3(dummyRegistrarSignature, enabledByDefaultFnSelectors);
+
+    await demoIntegrationUpgradeableNoModifier.connect(user).safeMint(MINT_QTY);
+    await expect(await demoIntegrationUpgradeableNoModifier.balanceOf(user.address)).equals(MINT_QTY);
   });
 });
