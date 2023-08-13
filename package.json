@@ -1,6 +1,6 @@
 {
   "name": "@cube-web3/cube3-integration",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "CUBE3 integration smart contracts",
   "repository": {
     "type": "git",
@@ -16,15 +16,17 @@
     "test"
   ],
   "scripts": {
-    "compile": "hardhat compile && hardhat typechain",
-    "test": "hardhat test",
-    "coverage: hardhat": "hardhat coverage",
     "prettier": "npx prettier -w .",
     "build:ts": "tsc -b",
     "husky:pre-commit": "npm run prettier && git add .",
     "slither": "slither . --filter-paths \"lib|test|node_modules\"",
     "docs:host": "forge doc --serve --port 4000",
-    "coverage:foundry": "forge coverage --report lcov && genhtml lcov.info --branch-coverage --output-dir coverage"
+    "hardhat:compile": "hardhat compile && hardhat typechain",
+    "hardhat:test": "npx hardhat test",
+    "hardhat:coverage": "hardhat coverage",
+    "foundry:compile": "forge build",
+    "foundry:test": "forge test -vvvv",
+    "foundry:coverage": "forge coverage --report lcov && genhtml lcov.info --branch-coverage --output-dir coverage"
   },
   "keywords": [
     "hardhat",
@@ -39,13 +41,15 @@
   "installConfig": {
     "hoistingLimits": "dependencies"
   },
+  "private": false,
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^3.0.0",
     "@openzeppelin/hardhat-upgrades": "^2.0.2",
     "@typechain/ethers-v6": "^0.4.3",
+    "@typechain/hardhat": "^8.0.3",
     "@types/chai": "^4.3.5",
     "@types/mocha": "^10.0.1",
-    "@types/node": "^20.4.5",
+    "@types/node": "^20.4.9",
     "@typescript-eslint/eslint-plugin": "^4.33.0",
     "@typescript-eslint/parser": "^4.33.0",
     "chai": "^4.3.7",
@@ -62,8 +66,7 @@
     "prettier": "^2.8.1",
     "prettier-plugin-solidity": "^1.0.0",
     "solhint": "^3.4.0",
-    "ts-node": "^10.9.1",
-    "typescript": "^4.9.5"
+    "typechain": "^8.3.1"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.8.2",

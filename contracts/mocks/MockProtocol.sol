@@ -1,13 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import {ICube3Data} from "../../../contracts/interfaces/ICube3Data.sol";
-import {ICube3Router} from "../../../contracts/interfaces/ICube3Router.sol";
-import {ICube3GateKeeper} from "../../../contracts/interfaces/ICube3GateKeeper.sol";
+import {ICube3Data} from "../../contracts/interfaces/ICube3Data.sol";
+import {ICube3Router} from "../../contracts/interfaces/ICube3Router.sol";
+import {ICube3GateKeeper} from "../../contracts/interfaces/ICube3GateKeeper.sol";
+
+// import so typechain generates types
+import {DemoIntegrationERC721} from "../../test/example/DemoIntegrationERC721.sol";
+import { DemoIntegrationERC721UpgradeableNoModifier, DemoIntegrationERC721UpgradeableWithModifier } from '../../test/example/DemoIntegrationERC721Upgradeable.sol';
 
 contract MockCube3Router {
 
   address internal immutable _gateKeeper;
+
+  string public name = "mock router";
+
   constructor(address gateKeeper) {
     _gateKeeper = gateKeeper;
   }
@@ -117,6 +124,13 @@ contract MockCube3GateKeeper {
     ) external {
         require(integrationSelf != msg.sender, "GK09: only proxy");
         emit IntegrationImplementationUpgradeAuthorized(integrationSelf, newImplementation);
+    }
+
+    function isIntegrationProxyFunctionProtectionEnabled(
+        address integrationProxy,
+        bytes4 fnSelector
+    ) external view returns (bool) {
+        return _integrationProxyFunctionProtectionStatus[integrationProxy][fnSelector];
     }
  
   function supportsInterface(bytes4 interfaceId) public pure returns (bool) {
