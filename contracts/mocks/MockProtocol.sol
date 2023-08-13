@@ -122,6 +122,13 @@ contract MockCube3GateKeeper {
         require(integrationSelf != msg.sender, "GK09: only proxy");
         emit IntegrationImplementationUpgradeAuthorized(integrationSelf, newImplementation);
     }
+
+    function isIntegrationProxyFunctionProtectionEnabled(
+        address integrationProxy,
+        bytes4 fnSelector
+    ) external view returns (bool) {
+        return _integrationProxyFunctionProtectionStatus[integrationProxy][fnSelector];
+    }
  
   function supportsInterface(bytes4 interfaceId) public pure returns (bool) {
    return interfaceId == type(ICube3GateKeeper).interfaceId || interfaceId == 0x01ffc9a7; // erc165;

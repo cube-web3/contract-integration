@@ -22,7 +22,7 @@ describe('Deploying demo CUBE3 Integrations', () => {
 
   let demoIntegration: DemoIntegrationERC721;
   let demoIntegrationUpgradeableNoModifier: any; // TODO: fix type
-  let demoIntegrationUpgradeableWithModifier: Contract;
+  let demoIntegrationUpgradeableWithModifier: any;
 
   before(async () => {
     console.log('chaindid: ', network.config.chainId);
@@ -92,7 +92,7 @@ describe('Deploying demo CUBE3 Integrations', () => {
 
   it('should succeed upgrading to the contract using the modifier and calling safeMint', async () => {
     // register the integration - remember only the proxy address is registered
-    const enabledByDefaultFnSelectors: string[] = [];
+    let enabledByDefaultFnSelectors: string[] = [];
     enabledByDefaultFnSelectors.push(demoIntegrationUpgradeableNoModifier.safeMint.fragment.selector);
 
     const dummyRegistrarSignature = new Uint8Array(65);
@@ -106,7 +106,7 @@ describe('Deploying demo CUBE3 Integrations', () => {
     );
 
     // upgrade to the contract version that includes the modifier
-    await upgrades.upgradeProxy(
+    demoIntegrationUpgradeableWithModifier = await upgrades.upgradeProxy(
       await demoIntegrationUpgradeableNoModifier.getAddress(),
       demoIntegrationUpgradeableWithModifierFactory.connect(securityAdmin),
       {
@@ -114,5 +114,15 @@ describe('Deploying demo CUBE3 Integrations', () => {
         unsafeAllow: ['constructor', 'state-variable-immutable'],
       }
     );
+
+    // The proxy is already registered and the new implementation is pre-authorized, however we will need to enable function
+    // protection for `safeMint` on the new implementation as the function selector has changed with the inclusion
+    // of the `cube3SecurePayload`
+    const enabledFnSelectors: string[] = [];
+    enabledFnSelectors.push(demoIntegrationUpgradeableWithModifier.safeMint.fragment.selector);
+
+    await demoIntegrationUpgradeableWithModifier.setFunctionProtectionStatus(enabledFnSelectors, [true]);
+    await expect(await demoIntegrationUpgradeableWithModifier.isFunctionProtectionEnabled(enabledFnSelectors[0])).is
+      .true;
   });
 });
