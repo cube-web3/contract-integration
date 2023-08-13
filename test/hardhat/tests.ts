@@ -16,6 +16,7 @@ describe('Deploying demo CUBE3 Integrations', () => {
   let accounts: SignerWithAddress[];
 
   let securityAdmin: SignerWithAddress;
+  let user: SignerWithAddress;
 
   let demoIntegration: DemoIntegrationERC721;
   let demoIntegrationUpgradeableNoModifier: Contract;
@@ -26,6 +27,7 @@ describe('Deploying demo CUBE3 Integrations', () => {
     accounts = await ethers.getSigners();
 
     securityAdmin = accounts[1];
+    user = accounts[2];
 
     // set the mock gatekeeper
     const MockGateKeeperFactory = await ethers.getContractFactory('MockCube3GateKeeper');
@@ -41,7 +43,7 @@ describe('Deploying demo CUBE3 Integrations', () => {
 
     // deploy the standalone integration
     const DemoIntegrationFactory = await ethers.getContractFactory('DemoIntegrationERC721');
-    demoIntegration = await DemoIntegrationFactory.deploy();
+    demoIntegration = await DemoIntegrationFactory.connect(securityAdmin).deploy();
 
     // deploy the upgradeable integration with no modifier
     const DemoIntegrationUpgradeableNoModifierFactory = await ethers.getContractFactory(
@@ -60,7 +62,16 @@ describe('Deploying demo CUBE3 Integrations', () => {
   });
 
   it('should succeed calling safeMint on standalone integration with function protection enabled', async () => {
-    const routerCode = await ethers.provider.getCode(MOCK_ROUTER_ADDRESS);
-    console.log('Router code size: ', routerCode.length);
+    const enabledByDefaultFnSelectors: string[] = [];
+    enabledByDefaultFnSelectors.push(demoIntegration.safeMint.fragment.selector);
+
+    const dummyRegistrarSignature = new Uint8Array(65);
+    await demoIntegration
+      .connect(securityAdmin)
+      .registerIntegrationWithCube3(dummyRegistrarSignature, enabledByDefaultFnSelectors);
+
+    const dummyCube3SecurePayload = new Uint8Array(64);
+    await demoIntegration.connect(user).safeMint(2, dummyCube3SecurePayload);
+    await expect(await demoIntegration.balanceOf(user.address)).equals(2);
   });
 });

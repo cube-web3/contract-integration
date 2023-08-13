@@ -24,7 +24,9 @@
     "husky:pre-commit": "npm run prettier && git add .",
     "slither": "slither . --filter-paths \"lib|test|node_modules\"",
     "docs:host": "forge doc --serve --port 4000",
-    "coverage:foundry": "forge coverage --report lcov && genhtml lcov.info --branch-coverage --output-dir coverage"
+    "coverage:foundry": "forge coverage --report lcov && genhtml lcov.info --branch-coverage --output-dir coverage",
+    "test:hardhat": "npx hardhat test",
+    "test:foundry": "forge test -vvvv"
   },
   "keywords": [
     "hardhat",
