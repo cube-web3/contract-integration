@@ -24,7 +24,7 @@ describe('Deploying demo CUBE3 Integrations', () => {
   let demoIntegrationUpgradeableNoModifier: any; // TODO: fix type
   let demoIntegrationUpgradeableWithModifier: any;
 
-  before(async () => {
+  beforeEach(async () => {
     console.log('chaindid: ', network.config.chainId);
     accounts = await ethers.getSigners();
 
@@ -124,5 +124,14 @@ describe('Deploying demo CUBE3 Integrations', () => {
     await demoIntegrationUpgradeableWithModifier.setFunctionProtectionStatus(enabledFnSelectors, [true]);
     await expect(await demoIntegrationUpgradeableWithModifier.isFunctionProtectionEnabled(enabledFnSelectors[0])).is
       .true;
+
+    let balance = await demoIntegrationUpgradeableWithModifier.balanceOf(user.address);
+    console.log({ balance });
+
+    // mint tokens
+    const dummyCube3SecurePayload = new Uint8Array(64);
+    await demoIntegrationUpgradeableWithModifier.connect(user).safeMint(MINT_QTY, dummyCube3SecurePayload);
+    balance = await demoIntegrationUpgradeableWithModifier.balanceOf(user.address);
+    await expect(balance).equals(MINT_QTY);
   });
 });
