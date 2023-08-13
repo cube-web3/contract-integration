@@ -89,4 +89,30 @@ describe('Deploying demo CUBE3 Integrations', () => {
     await demoIntegrationUpgradeableNoModifier.connect(user).safeMint(MINT_QTY);
     await expect(await demoIntegrationUpgradeableNoModifier.balanceOf(user.address)).equals(MINT_QTY);
   });
+
+  it('should succeed upgrading to the contract using the modifier and calling safeMint', async () => {
+    // register the integration - remember only the proxy address is registered
+    const enabledByDefaultFnSelectors: string[] = [];
+    enabledByDefaultFnSelectors.push(demoIntegrationUpgradeableNoModifier.safeMint.fragment.selector);
+
+    const dummyRegistrarSignature = new Uint8Array(65);
+    await demoIntegrationUpgradeableNoModifier
+      .connect(securityAdmin)
+      .registerIntegrationWithCube3(dummyRegistrarSignature, enabledByDefaultFnSelectors);
+
+    // deploy the new contract instance
+    const demoIntegrationUpgradeableWithModifierFactory = await ethers.getContractFactory(
+      'DemoIntegrationERC721UpgradeableWithModifier'
+    );
+
+    // upgrade to the contract version that includes the modifier
+    await upgrades.upgradeProxy(
+      await demoIntegrationUpgradeableNoModifier.getAddress(),
+      demoIntegrationUpgradeableWithModifierFactory.connect(securityAdmin),
+      {
+        kind: 'uups',
+        unsafeAllow: ['constructor', 'state-variable-immutable'],
+      }
+    );
+  });
 });
