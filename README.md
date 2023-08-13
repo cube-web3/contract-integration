@@ -604,7 +604,7 @@ git clone git@github.com:cube-web3/cube3-integration.git && cd cube3-integration
 Install the libraries:
 
 ```
-forge install
+forge install foundry-rs/forge-std openzeppelin/openzeppelin-contracts-upgradeable@release-v4.9 openzeppelin/openzeppelin-contracts@release-v4.9
 ```
 
 Run the tests
