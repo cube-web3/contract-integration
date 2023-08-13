@@ -8,7 +8,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol"; // i
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 
-import {Cube3IntegrationUpgradeable} from "../upgradeable/Cube3IntegrationUpgradeable.sol";
+import {Cube3IntegrationUpgradeable} from "../../contracts/upgradeable/Cube3IntegrationUpgradeable.sol";
 
 // The `Initializable` base contract is inherited by SecurityAdmin2StepUpgradeable, which is inherited by Cube3IntegrationUpgradeable, which is inherited by
 // Cube3IntegrationERC721Upgradeable. Therefore, we don't import `Initializable` here to avoid a linearization of the inheritance graph error.

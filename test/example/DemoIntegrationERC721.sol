@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
 // import the Cube3Integration contract
-import {Cube3Integration} from "../Cube3Integration.sol";
+import {Cube3Integration} from "../../contracts/Cube3Integration.sol";
 
 contract DemoIntegrationERC721 is ERC721, Cube3Integration {
     using Counters for Counters.Counter;

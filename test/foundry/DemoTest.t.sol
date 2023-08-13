@@ -3,8 +3,8 @@ pragma solidity 0.8.19;
 
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
-import {DemoIntegrationERC721} from "../../contracts/example/DemoIntegrationERC721.sol";
-import {DemoIntegrationERC721UpgradeableNoModifier,DemoIntegrationERC721UpgradeableWithModifier} from "../../contracts/example/DemoIntegrationERC721Upgradeable.sol";
+import {DemoIntegrationERC721} from "../example/DemoIntegrationERC721.sol";
+import {DemoIntegrationERC721UpgradeableNoModifier,DemoIntegrationERC721UpgradeableWithModifier} from "../example/DemoIntegrationERC721Upgradeable.sol";
 import {Cube3ProtocolTestUtils} from "./utils/deploy.sol";
 
 // inheirt from the Cube3ProtocolTestUtils contract to gain access to the mock CUBE3 protocol contracts

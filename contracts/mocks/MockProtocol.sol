@@ -5,6 +5,9 @@ import {ICube3Data} from "../../contracts/interfaces/ICube3Data.sol";
 import {ICube3Router} from "../../contracts/interfaces/ICube3Router.sol";
 import {ICube3GateKeeper} from "../../contracts/interfaces/ICube3GateKeeper.sol";
 
+// import so typechain generates types
+import {DemoIntegrationERC721} from "../../test/example/DemoIntegrationERC721.sol";
+import { DemoIntegrationERC721UpgradeableNoModifier, DemoIntegrationERC721UpgradeableWithModifier } from '../../test/example/DemoIntegrationERC721Upgradeable.sol';
 
 contract MockCube3Router {
 
