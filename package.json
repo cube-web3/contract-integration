@@ -8,7 +8,7 @@
   },
   "homepage": "https://cube3.ai",
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "registry": "https://registry.npmjs.org/"
   },
   "files": [
     "contracts",

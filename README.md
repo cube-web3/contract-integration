@@ -45,7 +45,7 @@ CUBE3 Smart Contracts use Solidity version `0.8.19`.
 ### Hardhat (NPM or Yarn)
 
 ```bash
-npm install --save-dev @cube-web3/cube3-integration @openzeppelin/contracts @openzeppelin/openzeppelin-contracts-upgradeable
+npm install --save-dev @cube3/cube3-integration @openzeppelin/contracts @openzeppelin/openzeppelin-contracts-upgradeable
 ```
 
 ### Foundry (Forge)
