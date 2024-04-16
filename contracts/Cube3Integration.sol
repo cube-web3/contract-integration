@@ -53,7 +53,7 @@ abstract contract Cube3Integration is ICube3Integration, SecurityAdmin2Step, ERC
 
         ICube3GateKeeper(cubeGateKeeperAddress).preRegisterAsIntegration(_self);
 
-        emit Cube3IntegrationDeployment(address(this), msg.sender);
+        emit Cube3IntegrationDeployment(address(this), msg.sender, securityAdmin());
     }
 
     /*//////////////////////////////////////////////////////////////

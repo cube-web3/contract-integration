@@ -82,7 +82,7 @@ abstract contract Cube3IntegrationUpgradeable is
 
         ICube3GateKeeper(_cube3GateKeeper).preRegisterAsIntegration(_self);
 
-        emit Cube3IntegrationDeployment(address(this), msg.sender);
+        emit Cube3IntegrationDeployment(address(this), msg.sender, securityAdminAddress);
     }
 
     /// @inheritdoc ICube3IntegrationUpgradeable
