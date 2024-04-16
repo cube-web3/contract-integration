@@ -25,7 +25,8 @@ interface ICube3Integration {
     /// @dev Emitted in the constructor and used to inform the Cube3 service that a new integration
     ///      has been deployed.
     /// @param self The contract address (this) of the new integration.
-    /// @param admin The default securityAdmin account at the time of deployment, ie the deployer.
+    /// @param deployer - the deployer of the integration.
+    /// @param admin - The default securityAdmin account at the time of deployment.
     event Cube3IntegrationDeployment(address indexed self, address indexed deployer, address indexed admin);
 
     /// @notice Emitted when the protection statuses of functions are updated.
