@@ -21,8 +21,8 @@ library ProtocolContractsByChain {
             gateKeeper = 0x5946959A7247F96EC4657ca0272C558f0aC11CC3;
         } else if (block.chainid == 11155111) {
             // sepolia
-            routerProxy = 0x3183AeD697c5076Ad46a3Aad0f0c0D2f41ac195F;
-            gateKeeper = 0x0a3957159192522c615C8F7396f0BA2A9a83F61f;
+            routerProxy = 0xb2959138d27b63e2728e0960f9c7b0bdc4169870;
+            gateKeeper = 0x86f3ed7d7f75e2675b83a8c6b01bad0a4b748eb3;
         } else {
             revert("Unrecognized chain id");
         }
