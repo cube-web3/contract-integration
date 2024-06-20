@@ -1,8 +1,7 @@
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers';
 import { setCode } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
 import { ethers, upgrades, network } from 'hardhat';
-import { Contract } from 'ethers';
 import {
   DemoIntegrationERC721,
   DemoIntegrationERC721UpgradeableNoModifier,
